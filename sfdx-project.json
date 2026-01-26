@@ -1,0 +1,12 @@
+{
+  "packageDirectories": [
+    {
+      "path": "force-app",
+      "default": true
+    }
+  ],
+  "name": "cremunaflix-back",
+  "namespace": "",
+  "sfdcLoginUrl": "https://aion-dev-ed.develop.my.salesforce.com",
+  "sourceApiVersion": "65.0"
+}
