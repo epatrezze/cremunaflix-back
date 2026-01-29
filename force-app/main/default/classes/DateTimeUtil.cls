@@ -1,38 +1,16 @@
 /**
  * @file DateTimeUtil
- * @description ISO-8601 parsing/formatting helpers for API payloads.
+ * @description ISO-8601 formatting helpers for API v1 payloads.
  * @layer Service
  * @patterns Utility
- * @author IA
- * @date 2026-01-25
+ * @author epatrezze
+ * @date 2026-01-27
  */
-public with sharing class DateTimeUtil {
-    /**
-     * @description Parses an ISO-8601 datetime string into a Datetime value.
-     * @param value ISO-8601 datetime string.
-     * @return Parsed Datetime or null if blank.
-     * @throws ApiException When parsing fails.
-     */
-    public static Datetime parseIso(String value) {
-        if (String.isBlank(value)) {
-            return null;
-        }
-
-        try {
-            return (Datetime) JSON.deserialize('"' + value + '"', Datetime.class);
-        } catch (Exception ex) {
-            throw new ApiException(400, 'INVALID_PARAMETER', 'Invalid datetime format.', new Map<String, Object>{
-                'value' => value,
-                'expected' => 'ISO-8601'
-            });
-        }
-    }
-
+public without sharing class DateTimeUtil {
     /**
      * @description Formats a Datetime into an ISO-8601 UTC string.
      * @param value Datetime to format.
      * @return ISO-8601 UTC string or null if value is null.
-     * @throws ApiException When formatting fails.
      */
     public static String formatIso(Datetime value) {
         if (value == null) {

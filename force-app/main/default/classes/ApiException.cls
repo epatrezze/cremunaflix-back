@@ -1,12 +1,12 @@
 /**
  * @file ApiException
- * @description Custom exception carrying HTTP status and API error details.
+ * @description Base exception carrying HTTP status and error details for API v1.
  * @layer Error
  * @patterns Exception
- * @author IA
- * @date 2026-01-25
+ * @author epatrezze
+ * @date 2026-01-27
  */
-public with sharing class ApiException extends Exception {
+public virtual without sharing class ApiException extends Exception {
     public Integer httpStatus;
     public String code;
     public Object details;
@@ -18,8 +18,6 @@ public with sharing class ApiException extends Exception {
      * @param code Error code identifier.
      * @param message Human-readable message.
      * @param details Optional error details.
-     * @return ApiException instance.
-     * @throws ApiException When instantiated for error flow.
      */
     public ApiException(Integer httpStatus, String code, String message, Object details) {
         this.httpStatus = httpStatus;

@@ -1,0 +1,4 @@
+Name,Movie__r.TMDB_Id__c,StartDateTime__c,EndDateTime__c,SessionType__c,Status__c,Location__c
+Interstellar Screening 2026-02-15,157336,2026-02-15T20:00:00Z,2026-02-15T22:50:00Z,SCREENING,UPCOMING,Main Hall
+Matrix Retro Night,603,2025-12-15T20:00:00Z,2025-12-15T22:30:00Z,SPECIAL,DONE,Auditorium 2
+Dune Premiere,693134,2026-03-05T23:00:00Z,2026-03-06T01:50:00Z,SCREENING,UPCOMING,Main Hall

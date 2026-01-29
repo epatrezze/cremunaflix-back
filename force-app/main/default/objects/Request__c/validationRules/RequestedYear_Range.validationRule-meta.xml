@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>RequestedYear_Range</fullName>
-    <active>true</active>
-    <errorConditionFormula>AND(NOT(ISBLANK(RequestedYear__c)), OR(RequestedYear__c &lt; 1888, RequestedYear__c &gt; YEAR(TODAY()) + 1))</errorConditionFormula>
-    <errorMessage>Requested Year must be between 1888 and next year.</errorMessage>
-    <errorDisplayField>RequestedYear__c</errorDisplayField>
-</ValidationRule>

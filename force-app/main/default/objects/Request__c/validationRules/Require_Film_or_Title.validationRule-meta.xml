@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Require_Film_or_Title</fullName>
-    <active>true</active>
-    <errorConditionFormula>AND(ISBLANK(Film__c), ISBLANK(RequestedTitle__c))</errorConditionFormula>
-    <errorMessage>Provide a Film or Requested Title.</errorMessage>
-    <errorDisplayField>RequestedTitle__c</errorDisplayField>
-</ValidationRule>

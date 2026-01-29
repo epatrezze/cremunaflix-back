@@ -1,29 +1,26 @@
 /**
  * @file SessionDAO
- * @description Centralized SOQL access for Session__c.
+ * @description SOQL access for Session__c.
  * @layer DAO
  * @patterns DAO
- * @author IA
- * @date 2026-01-25
+ * @author epatrezze
+ * @date 2026-01-27
  */
-public with sharing class SessionDAO {
+public without sharing class SessionDAO {
     private static final String BASE_FIELDS =
-        'Id, StartDateTime__c, EndDateTime__c, Status__c, Venue__c, Notes__c, ' +
-        'Film__r.Id, Film__r.Name, Film__r.ExternalKey__c, Film__r.PosterUrl__c, ' +
-        'Film__r.ReleaseYear__c, Film__r.DurationMinutes__c';
+        'Id, StartDateTime__c, Status__c, Movie__r.Id, Movie__r.TMDB_Id__c, Movie__r.Title__c, ' +
+        'Movie__r.ReleaseYear__c, Movie__r.PosterUrl__c, Movie__r.Status__c';
 
     /**
-     * @description Fetches upcoming sessions with pagination.
+     * @description Fetches upcoming sessions.
      * @param limitSize Max number of records.
      * @param offsetValue Offset for pagination.
      * @return List of Session__c records.
-     * @throws ApiException When query fails.
      */
     public static List<Session__c> fetchUpcoming(Integer limitSize, Integer offsetValue) {
         Datetime nowValue = System.now();
         List<Session__c> records = Database.query(
-            'SELECT ' + BASE_FIELDS + ' ' +
-            'FROM Session__c ' +
+            'SELECT ' + BASE_FIELDS + ' FROM Session__c ' +
             'WHERE StartDateTime__c >= :nowValue ' +
             'ORDER BY StartDateTime__c ASC ' +
             'LIMIT :limitSize OFFSET :offsetValue'
@@ -32,20 +29,8 @@ public with sharing class SessionDAO {
     }
 
     /**
-     * @description Fetches upcoming sessions (legacy signature).
-     * @param limitSize Max number of records.
-     * @return List of Session__c records.
-     * @throws ApiException When query fails.
-     */
-    public static List<Session__c> fetchUpcoming(Integer limitSize) {
-        return fetchUpcoming(limitSize, 0);
-    }
-
-    /**
      * @description Counts upcoming sessions.
-     * @param none
      * @return Total count.
-     * @throws ApiException When query fails.
      */
     public static Integer countUpcoming() {
         Datetime nowValue = System.now();
@@ -55,19 +40,16 @@ public with sharing class SessionDAO {
     }
 
     /**
-     * @description Fetches past sessions within a range with pagination.
-     * @param fromDt Start datetime.
-     * @param toDt End datetime.
+     * @description Fetches past sessions.
      * @param limitSize Max number of records.
      * @param offsetValue Offset for pagination.
      * @return List of Session__c records.
-     * @throws ApiException When query fails.
      */
-    public static List<Session__c> fetchPast(Datetime fromDt, Datetime toDt, Integer limitSize, Integer offsetValue) {
+    public static List<Session__c> fetchPast(Integer limitSize, Integer offsetValue) {
+        Datetime nowValue = System.now();
         List<Session__c> records = Database.query(
-            'SELECT ' + BASE_FIELDS + ' ' +
-            'FROM Session__c ' +
-            'WHERE StartDateTime__c >= :fromDt AND StartDateTime__c <= :toDt ' +
+            'SELECT ' + BASE_FIELDS + ' FROM Session__c ' +
+            'WHERE StartDateTime__c < :nowValue ' +
             'ORDER BY StartDateTime__c DESC ' +
             'LIMIT :limitSize OFFSET :offsetValue'
         );
@@ -75,28 +57,28 @@ public with sharing class SessionDAO {
     }
 
     /**
-     * @description Fetches past sessions (legacy signature).
-     * @param fromDt Start datetime.
-     * @param toDt End datetime.
-     * @param limitSize Max number of records.
-     * @return List of Session__c records.
-     * @throws ApiException When query fails.
+     * @description Counts past sessions.
+     * @return Total count.
      */
-    public static List<Session__c> fetchPast(Datetime fromDt, Datetime toDt, Integer limitSize) {
-        return fetchPast(fromDt, toDt, limitSize, 0);
+    public static Integer countPast() {
+        Datetime nowValue = System.now();
+        return Database.countQuery(
+            'SELECT COUNT() FROM Session__c WHERE StartDateTime__c < :nowValue'
+        );
     }
 
     /**
-     * @description Counts past sessions in a range.
-     * @param fromDt Start datetime.
-     * @param toDt End datetime.
-     * @return Total count.
-     * @throws ApiException When query fails.
+     * @description Fetches recent sessions for home.
+     * @param limitSize Max number of records.
+     * @return List of Session__c records.
      */
-    public static Integer countPast(Datetime fromDt, Datetime toDt) {
-        return Database.countQuery(
-            'SELECT COUNT() FROM Session__c WHERE StartDateTime__c >= :fromDt AND StartDateTime__c <= :toDt'
+    public static List<Session__c> fetchRecent(Integer limitSize) {
+        List<Session__c> records = Database.query(
+            'SELECT ' + BASE_FIELDS + ' FROM Session__c ' +
+            'ORDER BY StartDateTime__c DESC ' +
+            'LIMIT :limitSize'
         );
+        return sanitizeList(records);
     }
 
     private static List<Session__c> sanitizeList(List<Session__c> records) {

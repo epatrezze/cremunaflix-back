@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>VR_EmailFormatOptional</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(NOT(ISBLANK(RequesterEmail__c)), NOT(REGEX(RequesterEmail__c, "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")))</errorConditionFormula>
+    <errorMessage>Enter a valid email address.</errorMessage>
+    <errorDisplayField>RequesterEmail__c</errorDisplayField>
+</ValidationRule>

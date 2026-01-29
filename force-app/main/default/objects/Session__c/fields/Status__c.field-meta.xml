@@ -14,9 +14,9 @@
                 <label>UPCOMING</label>
             </value>
             <value>
-                <fullName>PAST</fullName>
+                <fullName>DONE</fullName>
                 <default>false</default>
-                <label>PAST</label>
+                <label>DONE</label>
             </value>
             <value>
                 <fullName>CANCELLED</fullName>

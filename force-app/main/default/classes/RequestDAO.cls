@@ -1,30 +1,28 @@
 /**
  * @file RequestDAO
- * @description Centralized SOQL and DML access for Request__c.
+ * @description SOQL and DML access for MovieRequest__c.
  * @layer DAO
  * @patterns DAO
- * @author IA
- * @date 2026-01-25
+ * @author epatrezze
+ * @date 2026-01-27
  */
-public with sharing class RequestDAO {
+public without sharing class RequestDAO {
     private static final String BASE_FIELDS =
-        'Id, Status__c, RequesterName__c, RequesterEmail__c, Film__c, RequestedTitle__c, ' +
-        'RequestedYear__c, Notes__c, CreatedDate, ' +
-        'Film__r.Id, Film__r.ExternalKey__c';
+        'Id, Status__c, CreatedDate, RequestedBy__r.Name, TMDB_Id__c, Title__c, PosterUrl__c, ' +
+        'Movie__r.Id, Movie__r.TMDB_Id__c, Movie__r.Title__c, Movie__r.ReleaseYear__c, ' +
+        'Movie__r.PosterUrl__c, Movie__r.Status__c';
 
     /**
-     * @description Fetches a list of requests with sorting and pagination.
-     * @param sortParam Sort string.
+     * @description Fetches requests with pagination.
      * @param offsetValue Offset for pagination.
      * @param limitSize Max number of records.
-     * @return List of Request__c records.
-     * @throws ApiException When sort is invalid or query fails.
+     * @param sortValue Sort value.
+     * @return List of MovieRequest__c records.
      */
-    public static List<Request__c> fetchList(String sortParam, Integer offsetValue, Integer limitSize) {
-        String orderByClause = buildOrderBy(sortParam);
-        List<Request__c> records = Database.query(
-            'SELECT ' + BASE_FIELDS + ' ' +
-            'FROM Request__c ' +
+    public static List<MovieRequest__c> fetchRequests(Integer offsetValue, Integer limitSize, String sortValue) {
+        String orderByClause = buildOrderBy(sortValue);
+        List<MovieRequest__c> records = Database.query(
+            'SELECT ' + BASE_FIELDS + ' FROM MovieRequest__c ' +
             'ORDER BY ' + orderByClause + ' ' +
             'LIMIT :limitSize OFFSET :offsetValue'
         );
@@ -32,22 +30,19 @@ public with sharing class RequestDAO {
     }
 
     /**
-     * @description Counts all Request__c records.
-     * @param none
+     * @description Counts total requests.
      * @return Total count.
-     * @throws ApiException When query fails.
      */
-    public static Integer countTotal() {
-        return Database.countQuery('SELECT COUNT() FROM Request__c');
+    public static Integer countRequests() {
+        return Database.countQuery('SELECT COUNT() FROM MovieRequest__c');
     }
 
     /**
-     * @description Inserts a request record with CRUD/FLS enforcement.
-     * @param record Request__c record to insert.
+     * @description Inserts a movie request record with CRUD/FLS enforcement.
+     * @param record MovieRequest__c record to insert.
      * @return Inserted record Id.
-     * @throws ApiException When insert fails or lacks permissions.
      */
-    public static Id insertRequest(Request__c record) {
+    public static Id insertRequest(MovieRequest__c record) {
         List<SObject> creatable = Security.stripInaccessible(
             AccessType.CREATABLE,
             new List<SObject>{ record }
@@ -55,60 +50,72 @@ public with sharing class RequestDAO {
         if (creatable.isEmpty()) {
             throw new ApiException(403, 'FORBIDDEN', 'Missing create permission.', null);
         }
-
         Database.insert(creatable[0], false);
-        return ((Request__c) creatable[0]).Id;
+        return ((MovieRequest__c) creatable[0]).Id;
     }
 
     /**
-     * @description Fetches a request by Id.
-     * @param requestId Request record Id.
-     * @return Request__c record or null.
-     * @throws ApiException When query fails.
+     * @description Fetches requests by id.
+     * @param requestId Request Id.
+     * @return MovieRequest__c record or null.
      */
-    public static Request__c fetchById(Id requestId) {
+    public static MovieRequest__c fetchById(Id requestId) {
         if (requestId == null) {
             return null;
         }
-        List<Request__c> records = Database.query(
-            'SELECT ' + BASE_FIELDS + ' FROM Request__c WHERE Id = :requestId LIMIT 1'
+        List<MovieRequest__c> records = Database.query(
+            'SELECT ' + BASE_FIELDS + ' FROM MovieRequest__c WHERE Id = :requestId LIMIT 1'
         );
         return sanitizeSingle(records);
     }
 
-    private static String buildOrderBy(String sortParam) {
-        if (String.isBlank(sortParam) || sortParam == 'createdAt_desc') {
+    /**
+     * @description Returns most requested Movie__c Ids.
+     * @param limitSize Max number of records.
+     * @return List of Movie__c Ids.
+     */
+    public static List<Id> fetchMostRequestedMovieIds(Integer limitSize) {
+        List<AggregateResult> results = [
+            SELECT Movie__c movieId, COUNT(Id) total
+            FROM MovieRequest__c
+            WHERE Movie__c != null
+            GROUP BY Movie__c
+            ORDER BY COUNT(Id) DESC
+            LIMIT :limitSize
+        ];
+        List<Id> ids = new List<Id>();
+        for (AggregateResult row : results) {
+            ids.add((Id) row.get('movieId'));
+        }
+        return ids;
+    }
+
+    private static String buildOrderBy(String sortValue) {
+        if (String.isBlank(sortValue) || sortValue == 'requestedAt_desc') {
             return 'CreatedDate DESC';
         }
-        if (sortParam == 'createdAt_asc') {
+        if (sortValue == 'requestedAt_asc') {
             return 'CreatedDate ASC';
         }
-        if (sortParam == 'status_asc') {
-            return 'Status__c ASC';
-        }
-        if (sortParam == 'status_desc') {
-            return 'Status__c DESC';
-        }
-
-        throw new ApiException(400, 'INVALID_PARAMETER', 'Invalid parameter: sort.', new Map<String, Object>{
+        throw new ValidationException('Invalid parameter: sort.', new Map<String, Object>{
             'param' => 'sort',
-            'value' => sortParam,
-            'allowed' => new List<String>{ 'createdAt_desc', 'createdAt_asc', 'status_asc', 'status_desc' }
+            'value' => sortValue,
+            'allowed' => new List<String>{ 'requestedAt_desc', 'requestedAt_asc' }
         });
     }
 
-    private static Request__c sanitizeSingle(List<Request__c> records) {
+    private static MovieRequest__c sanitizeSingle(List<MovieRequest__c> records) {
         if (records == null || records.isEmpty()) {
             return null;
         }
-        List<Request__c> sanitized = (List<Request__c>) Security.stripInaccessible(AccessType.READABLE, records).getRecords();
+        List<MovieRequest__c> sanitized = (List<MovieRequest__c>) Security.stripInaccessible(AccessType.READABLE, records).getRecords();
         return sanitized.isEmpty() ? null : sanitized[0];
     }
 
-    private static List<Request__c> sanitizeList(List<Request__c> records) {
+    private static List<MovieRequest__c> sanitizeList(List<MovieRequest__c> records) {
         if (records == null) {
-            return new List<Request__c>();
+            return new List<MovieRequest__c>();
         }
-        return (List<Request__c>) Security.stripInaccessible(AccessType.READABLE, records).getRecords();
+        return (List<MovieRequest__c>) Security.stripInaccessible(AccessType.READABLE, records).getRecords();
     }
 }

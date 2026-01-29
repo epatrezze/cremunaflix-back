@@ -14,51 +14,60 @@ Projeto de estudo de implantacao em Salesforce, ainda em desenvolvimento. O foco
 
 ## Padroes e arquitetura 🧱
 
-- DTO: contratos de entrada/saida (`SessionDTO`, `RequestDTO`, `CreateRequestDTO`).
-- DAO: acesso a dados centralizado (`SessionDAO`, `RequestDAO`, `FilmDAO`).
-- Mapper: conversao SObject -> DTO (`SessionMapper`, `RequestMapper`, `FilmMapper`).
-- Service/Facade: orquestracao de regras (`SessionServiceV1`, `RequestServiceV1`).
-- Chain of Responsibility: validacao de POST /requests (`RequestValidator`, `RequiredFieldsValidator`, `BusinessRulesValidator`, `PermissionValidator`).
-- Exception handling: `ApiException` + `ControllerUtil` para respostas padronizadas.
+- DTO: contratos de entrada/saida (`HomeDTO`, `RequestDTO`, `RequestCreateDTO`, `PagedResponseDTO`).
+- DAO: acesso a dados centralizado (`SessionDAO`, `RequestDAO`, `MovieDAO`, `GenreDAO`).
+- Mapper: conversao SObject -> DTO (`MovieMapper`).
+- Service/Facade: orquestracao de regras (`HomeService`, `SessionService`, `MovieService`, `RequestService`).
+- Exception handling: `ApiException` + `ErrorDTO` para respostas padronizadas.
 
 ## Estrutura de classes por responsabilidade 📚
 
-- Controllers (REST):
-  - `SessionControllerV1`
-  - `RequestControllerV1`
+- Controller (REST):
+  - `ApiV1Controller`
 - Services:
-  - `SessionServiceV1`
-  - `RequestServiceV1`
+  - `HomeService`
+  - `SessionService`
+  - `MovieService`
+  - `RequestService`
 - DAOs:
   - `SessionDAO`
   - `RequestDAO`
-  - `FilmDAO`
+  - `MovieDAO`
+  - `GenreDAO`
 - Mappers:
-  - `SessionMapper`
-  - `RequestMapper`
-  - `FilmMapper`
+  - `MovieMapper`
 - DTOs:
+  - `HomeDTO`
+  - `HomeHeroDTO`
+  - `MovieDTO`
+  - `MovieSummaryDTO`
+  - `MovieMetricsDTO`
+  - `MovieImagesDTO`
   - `SessionDTO`
   - `RequestDTO`
-  - `CreateRequestDTO`
-  - `PaginatedResponseDTO`
-  - `ApiErrorDTO`
-- Validators:
-  - `RequestValidator`
-  - `RequiredFieldsValidator`
-  - `BusinessRulesValidator`
-  - `PermissionValidator`
+  - `RequestCreateDTO`
+  - `PagedResponseDTO`
+  - `PageInfoDTO`
+  - `ErrorDTO`
+  - `GenreDTO`
+- Exceptions:
+  - `ApiException`
+  - `ValidationException`
+  - `NotFoundException`
 - Utils:
   - `DateTimeUtil`
-  - `AuthUtil`
-  - `ControllerUtil`
 
 ## Rotas disponiveis 📌
 
-- `GET /services/apexrest/api/v1/sessions/upcoming`
-- `GET /services/apexrest/api/v1/sessions/past?from=&to=`
+- `GET /services/apexrest/api/v1/home`
+- `GET /services/apexrest/api/v1/movies?query=&status=&year=&genreId=&sort=&page=&pageSize=`
+- `GET /services/apexrest/api/v1/sessions?scope=upcoming|past&page=&pageSize=`
 - `GET /services/apexrest/api/v1/requests?sort=&page=&pageSize=`
 - `POST /services/apexrest/api/v1/requests`
+
+Compatibilidade (legado):
+- `GET /services/apexrest/api/v1/sessions/upcoming`
+- `GET /services/apexrest/api/v1/sessions/past`
 
 ## Como usar 🛠️
 
@@ -79,16 +88,16 @@ sf project deploy start --source-dir force-app
 
 4) Testar endpoints (Workbench/Postman):
 - Base URL: `https://<mydomain>.my.salesforce.com/services/apexrest`
-- Exemplo GET upcoming:
-  - `GET /api/v1/sessions/upcoming`
+- Exemplo GET home:
+  - `GET /api/v1/home`
 - Exemplo POST request:
 ```json
 {
-  "requesterName": "Maria",
-  "requestedTitle": "The Matrix",
-  "requestedYear": 1999,
+  "title": "The Matrix",
+  "tmdbId": "603",
+  "posterUrl": "https://image.tmdb.org/t/p/w342/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
   "notes": "Quero esse filme",
-  "priority": "HIGH"
+  "requestedById": "003000000000000AAA"
 }
 ```
 
@@ -96,7 +105,12 @@ sf project deploy start --source-dir force-app
 
 - API sempre retorna DTOs (nunca SObject direto).
 - Datas em ISO-8601 UTC.
-- `AuthUtil.enforceAuth` esta desativado por padrao (modo dev).
+- A origem do front precisa apontar para o dominio Salesforce (com `/services/apexrest`).
+
+## Problemas comuns 🧯
+
+- Erro `404` com HTML do GitHub Pages: a chamada esta indo para o dominio do front.
+  Ajuste o `baseURL` do front para `https://<mydomain>.my.salesforce.com/services/apexrest`.
 
 ## Contribuicao
 

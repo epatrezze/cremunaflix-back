@@ -1,19 +1,18 @@
 /**
  * @file RequestDTO
- * @description Request data transfer object for API responses.
+ * @description Movie request payload for API v1 responses.
  * @layer DTO
  * @patterns DTO
- * @author IA
- * @date 2026-01-25
+ * @author epatrezze
+ * @date 2026-01-27
  */
-public with sharing class RequestDTO {
+public without sharing class RequestDTO {
     public String id;
     public String status;
-    public String requesterName;
-    public String requesterEmail;
-    public String filmId;
-    public String requestedTitle;
-    public Integer requestedYear;
-    public String notes;
-    public String createdAt;
+    public String requestedAt;
+    public String requestedBy;
+    public String tmdbId;
+    public String title;
+    public String posterUrl;
+    public MovieSummaryDTO movie;
 }

@@ -3,10 +3,9 @@
     <label>Session</label>
     <pluralLabel>Sessions</pluralLabel>
     <nameField>
-        <label>Session Number</label>
-        <type>AutoNumber</type>
-        <displayFormat>SES-{0000}</displayFormat>
+        <label>Session Name</label>
+        <type>Text</type>
     </nameField>
     <deploymentStatus>Deployed</deploymentStatus>
-    <sharingModel>ControlledByParent</sharingModel>
+    <sharingModel>ReadWrite</sharingModel>
 </CustomObject>

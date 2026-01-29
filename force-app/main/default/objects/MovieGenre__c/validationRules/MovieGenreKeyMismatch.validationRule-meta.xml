@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ValidationRule xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>MovieGenreKeyMismatch</fullName>
+    <active>true</active>
+    <errorConditionFormula>AND(NOT(ISBLANK(Movie__c)), NOT(ISBLANK(Genre__c)), MovieGenreKey__c &lt;&gt; (CASESAFEID(Movie__c) &amp; '-' &amp; CASESAFEID(Genre__c)))</errorConditionFormula>
+    <errorMessage>MovieGenreKey__c must match Movie__c-Genre__c.</errorMessage>
+    <errorDisplayField>MovieGenreKey__c</errorDisplayField>
+</ValidationRule>
